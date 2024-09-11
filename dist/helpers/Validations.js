@@ -27,6 +27,7 @@ class Validations {
                 select = yield query.select(['*'], `${table}`, [`${column} = "${value}"`]);
             }
             const values = yield Db_1.default.query(select);
+            console.log(values);
             if (values.length !== 0) {
                 throw { status: 400, msg: `${column} already in use` };
             }

@@ -23,6 +23,7 @@ class Validations {
         }
 
         const values = await Db.query(select);
+        console.log(values)
 
         if (values.length !== 0) {
             throw { status: 400, msg: `${column} already in use` };
