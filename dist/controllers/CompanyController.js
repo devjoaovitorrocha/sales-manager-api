@@ -31,11 +31,11 @@ class CompanyController {
                 const company = { name, identity, identity_type, email, password: passwordHash };
                 const insertCompany = yield query.insert('Companies', Object.assign({}, company));
                 const resultInsert = yield Db_1.default.query(insertCompany);
-                if (!resultInsert.affectedRows) {
+                if (!resultInsert) {
                     throw new Error;
                 }
                 const selectCompany = yield query.select(['id'], 'Companies', [`name = "${name}"`]);
-                const resultSelect = yield Db_1.default.query(selectCompany);
+                const resultSelect = Object.values(yield Db_1.default.query(selectCompany));
                 const fk_id = resultSelect[0].id;
                 yield Validations_1.default.address('CompaniesAddresses', fk_id, 'company', street, number, complement, neighborhood, city, state, country, res);
                 yield Validations_1.default.phone('CompaniesPhones', fk_id, 'company', phone, is_cellphone, res);

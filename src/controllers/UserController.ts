@@ -37,13 +37,13 @@ class UserController{
             const User: User = {code, identity, identity_type, name, email, password: passwordHash, user_type}
             
             const insert = await query.insert('Users', { ...User })
-            const result: mysql.ResultSetHeader = await Db.query(insert)
+            // const result: mysql.ResultSetHeader = await Db.query(insert)
 
-            if(!result.affectedRows){
-                throw new Error
-            }
+            // if(!result.affectedRows){
+            //     throw new Error
+            // }
            
-            return res.status(200).json({msg: "user registered"})
+            // return res.status(200).json({msg: "user registered"})
 
         }catch(err){
             if (!res.headersSent) {

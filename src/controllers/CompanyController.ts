@@ -42,13 +42,13 @@ class CompanyController{
             const company: Company = {name, identity, identity_type, email, password: passwordHash}
             
             const insertCompany = await query.insert('Companies', { ...company })
-            const resultInsert: mysql.ResultSetHeader = await Db.query(insertCompany)
-            if(!resultInsert.affectedRows){
+            const resultInsert = await Db.query(insertCompany)
+            if(!resultInsert){
                 throw new Error
             }
 
             const selectCompany = await query.select(['id'], 'Companies', [`name = "${name}"`])
-            const resultSelect: Array<Company> = await Db.query(selectCompany)
+            const resultSelect = Object.values(await Db.query(selectCompany))
             const fk_id = resultSelect[0].id
 
             await Validations.address('CompaniesAddresses', fk_id, 'company', street, number, complement, neighborhood, city, state, country, res)

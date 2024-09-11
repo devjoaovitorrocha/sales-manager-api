@@ -5,8 +5,7 @@ import QueryConfig from "./Query";
 import User from "../models/User";
 import Client from "../models/Client";
 import bcrypt from "bcrypt"
-import Address from "../models/CompaniesAddress";
-import Phone from "../models/Phone";
+import Company from "../models/Company";
 
 const query = QueryConfig;
 
@@ -22,8 +21,7 @@ class Validations {
             select = await query.select(['*'], `${table}`, [`${column} = "${value}"`]);
         }
 
-        const values = await Db.query(select);
-        console.log(values)
+        const values: mysql.QueryResult = Object.values(await Db.query(select));
 
         if (values.length !== 0) {
             throw { status: 400, msg: `${column} already in use` };
@@ -52,9 +50,9 @@ class Validations {
         }
 
         const insert = await query.insert(table, {...address})
-        const result = await Db.query(insert)
+        const result: mysql.QueryResult = await Db.query(insert)
 
-        if(!result.affectedRows){
+        if(!result){
             throw new Error
         }
     }
@@ -81,9 +79,9 @@ class Validations {
         }
 
         const insert = await query.insert(table, {...cellphone})
-        const result = await Db.query(insert)
+        const result: mysql.QueryResult = await Db.query(insert)
 
-        if(!result.affectedRows){ 
+        if(!result){ 
             throw new Error
         }
     }
@@ -122,7 +120,7 @@ class Validations {
         await this.isUnique(table, 'name', name, res, isUpdate, user);
     }
 
-    async password(password: string, res: Response, isLogin: boolean, user?: User) {
+    async password(password: string, res: Response, isLogin: boolean, user?: User, company?: Company) {
         if (password.length > 18) {
             throw { status: 400, msg: `password length must be lower than 18 characters` };
         }
@@ -132,11 +130,17 @@ class Validations {
         }
 
         if(isLogin){
-            if(!user){
+            if(!user && !company){
                 throw {status: 401, msg: 'user not found'}
             }
 
-            const match = await bcrypt.compare(password, user.password)
+            let match
+
+            if(user){
+                match = await bcrypt.compare(password, user.password)
+            }else{
+                match = await bcrypt.compare(password, company.password)
+            }
 
             if(!match){
                 throw {status: 401, msg: 'invalid credentials'}

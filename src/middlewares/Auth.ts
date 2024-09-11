@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import * as dotenv from 'dotenv';
+
+dotenv.config()
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -9,8 +12,14 @@ interface JwtPayload {
     role: string;
 }
 
+declare module 'express-serve-static-core' {
+    interface Request {
+      user?: JwtPayload; // Add the user property to Request
+    }
+}
+
 class Auth{
-    async checkToken(req: Request, res: Response, next: NextFunction, roles?: Array<string>){
+    async checkToken(req: Request, res: Response, next: NextFunction){
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
@@ -21,19 +30,11 @@ class Auth{
                 throw { status: 401, msg: 'token and userId must be provided'}
             }
 
-            jwt.verify(token, JWT_SECRET, (err, user: JwtPayload) => {
+            const decoded = jwt.verify(token, JWT_SECRET);
 
-                if (err || userId != user.id){
-                    throw {status: 401, msg: 'invalid token'};
-                }
+            req.user = decoded as JwtPayload;
 
-                if(roles){
-                    this.checkRole(roles, user, req, res, next)
-                }
-
-                next();
-            });
-
+            next()
         }catch(err){
             if (!res.headersSent) {
                 const status = err.status || 500; // Padrão para 500 se o status não for fornecido
@@ -42,16 +43,15 @@ class Auth{
             }
         }
     }
+}
 
-    private async checkRole(roles: Array<string>, user: JwtPayload, req: Request, res: Response, next: NextFunction){
-        if(!roles.includes(user.role)){
-            throw {status: 403, msg: 'access forbidden'}
-        }
-
-        next()
+export const checkRole = (roles?: Array<string>) => (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as JwtPayload
+    if(roles && !roles.includes(user.role)){
+        throw {status: 403, msg: 'access forbidden'}
     }
 
-
+    next()
 }
 
 export default new Auth()

@@ -26,8 +26,7 @@ class Validations {
             else {
                 select = yield query.select(['*'], `${table}`, [`${column} = "${value}"`]);
             }
-            const values = yield Db_1.default.query(select);
-            console.log(values);
+            const values = Object.values(yield Db_1.default.query(select));
             if (values.length !== 0) {
                 throw { status: 400, msg: `${column} already in use` };
             }
@@ -54,7 +53,7 @@ class Validations {
             }
             const insert = yield query.insert(table, Object.assign({}, address));
             const result = yield Db_1.default.query(insert);
-            if (!result.affectedRows) {
+            if (!result) {
                 throw new Error;
             }
         });
@@ -80,7 +79,7 @@ class Validations {
             }
             const insert = yield query.insert(table, Object.assign({}, cellphone));
             const result = yield Db_1.default.query(insert);
-            if (!result.affectedRows) {
+            if (!result) {
                 throw new Error;
             }
         });
@@ -118,7 +117,7 @@ class Validations {
             yield this.isUnique(table, 'name', name, res, isUpdate, user);
         });
     }
-    password(password, res, isLogin, user) {
+    password(password, res, isLogin, user, company) {
         return __awaiter(this, void 0, void 0, function* () {
             if (password.length > 18) {
                 throw { status: 400, msg: `password length must be lower than 18 characters` };
@@ -127,10 +126,16 @@ class Validations {
                 throw { status: 400, msg: `password must contain a number` };
             }
             if (isLogin) {
-                if (!user) {
+                if (!user && !company) {
                     throw { status: 401, msg: 'user not found' };
                 }
-                const match = yield bcrypt_1.default.compare(password, user.password);
+                let match;
+                if (user) {
+                    match = yield bcrypt_1.default.compare(password, user.password);
+                }
+                else {
+                    match = yield bcrypt_1.default.compare(password, company.password);
+                }
                 if (!match) {
                     throw { status: 401, msg: 'invalid credentials' };
                 }

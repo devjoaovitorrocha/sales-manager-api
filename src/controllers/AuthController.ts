@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken"
 import Validations from "../helpers/Validations";
 import Query from "../helpers/Query";
 import Db from "../services/Db";
+import Company from "../models/Company";
+import * as dotenv from 'dotenv';
+
+dotenv.config()
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -27,17 +31,21 @@ class AuthController{
         }
 
         try{
-            const select = await Query.select(['*'], 'Users', [`${Object.keys(username)[0]} = "${Object.values(username)[0]}"`])
-            const result = await Db.query(select)
-            const user: User = result[0]
+            const selectUser = await Query.select(['*'], 'Users', [`${Object.keys(username)[0]} = "${Object.values(username)[0]}"`])
+            const resultUser = Object.values(await Db.query(selectUser))
+            const user: User = resultUser[0]
+            
+            const selectCompany = await Query.select(['*'], 'Companies', [`${Object.keys(username)[0]} = "${Object.values(username)[0]}"`])
+            const resultCompany = Object.values(await Db.query(selectCompany))
+            const company: Company = resultCompany[0]
 
-            await Validations.password(password, res, true, user)
+            await Validations.password(password, res, true, user, company)
 
             const token = jwt.sign(
                 {
-                    id: user.id,
+                    id: user ? user.id : company.id,
                     username: Object.values(username)[0],
-                    role: user.user_type
+                    role: user ? user.user_type : 'master'
                 },
                 JWT_SECRET,
                 { expiresIn: '1h'}

@@ -1,6 +1,6 @@
 interface Address{
     id?: number,
-    fk_idcompany: number,
+    fk_id: number,
     street: string,
     number: number,
     complement: string,

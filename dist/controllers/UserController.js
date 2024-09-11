@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Db_1 = __importDefault(require("../services/Db"));
 const Query_1 = __importDefault(require("../helpers/Query"));
 const Validations_1 = __importDefault(require("../helpers/Validations"));
 const query = Query_1.default;
@@ -32,11 +31,11 @@ class UserController {
                 const passwordHash = yield Validations_1.default.password(password, res, false);
                 const User = { code, identity, identity_type, name, email, password: passwordHash, user_type };
                 const insert = yield query.insert('Users', Object.assign({}, User));
-                const result = yield Db_1.default.query(insert);
-                if (!result.affectedRows) {
-                    throw new Error;
-                }
-                return res.status(200).json({ msg: "user registered" });
+                // const result: mysql.ResultSetHeader = await Db.query(insert)
+                // if(!result.affectedRows){
+                //     throw new Error
+                // }
+                // return res.status(200).json({msg: "user registered"})
             }
             catch (err) {
                 if (!res.headersSent) {

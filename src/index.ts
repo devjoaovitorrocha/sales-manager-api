@@ -1,15 +1,10 @@
 import express, { Request, Response } from 'express'
 import * as dotenv from 'dotenv'
-import routeUser from './routes/routeUser'
-import routeClient from './routes/routeClient'
-import routeSale from './routes/routeSale'
-import routeProduct from './routes/routeProduct'
-import routeStock from './routes/routeStock'
-import routeAddress from './routes/routeAddress'
-import routePhone from './routes/routePhone'
-import routeSaleItem from './routes/routeSaleItem'
-import routeAuth from './routes/routeAuth'
-import routeCompany from './routes/routeCompany'
+import register from './routes/register'
+import deleteRoute from './routes/delete'
+import view from './routes/view'
+import update from './routes/update'
+import auth from './routes/auth'
 
 dotenv.config()
 
@@ -18,16 +13,11 @@ const port = process.env.PORT
 app.use(express.json())
 
 //ROUTES
-app.use(routeAuth)
-app.use(routeCompany)
-app.use(routeUser)
-app.use(routeClient)
-app.use(routeSale)
-app.use(routeProduct)
-app.use(routeStock)
-app.use(routeAddress)
-app.use(routePhone)
-app.use(routeSaleItem)
+app.use(register)
+app.use(update)
+app.use(view)
+app.use(deleteRoute)
+app.use(auth)
 
 app.get('/', (req: Request, res: Response) => {
   return res.json({msg: 'Everything is ok now...'})

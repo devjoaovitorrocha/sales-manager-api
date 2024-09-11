@@ -42,7 +42,7 @@ class Db{
 
             return rows
         }catch(err){
-            return err
+            throw {status: 500, msg: 'server error', err}
         }
     }
 }
