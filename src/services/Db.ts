@@ -17,8 +17,8 @@ class Db{
             });
 
             return conn
-        }catch(err){
-            return err 
+        }catch(err){ 
+            throw {status: 500, msg: 'server error', err}
         }
        
     }
@@ -26,8 +26,8 @@ class Db{
     private async closeConnection(conn: mysql.Connection){
         try{
             await conn.end()
-        }catch(err){
-            return err 
+        }catch(err){ 
+            throw {status: 500, msg: 'server error', err}
         }
        
     }

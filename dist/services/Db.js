@@ -52,7 +52,7 @@ class Db {
                 return conn;
             }
             catch (err) {
-                return err;
+                throw { status: 500, msg: 'server error', err };
             }
         });
     }
@@ -62,7 +62,7 @@ class Db {
                 yield conn.end();
             }
             catch (err) {
-                return err;
+                throw { status: 500, msg: 'server error', err };
             }
         });
     }
