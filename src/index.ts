@@ -1,4 +1,4 @@
-import express, { Response } from 'express'
+import express, { Request, Response } from 'express'
 import * as dotenv from 'dotenv'
 import routeUser from './routes/routeUser'
 import routeClient from './routes/routeClient'
@@ -29,11 +29,10 @@ app.use(routeAddress)
 app.use(routePhone)
 app.use(routeSaleItem)
 
-app.get('/', (res: Response) => {
-  return res.status(200).json({
-    msg: 'Api is on...'
-  })
+app.get('/', (req: Request, res: Response) => {
+  return res.json({msg: 'Everything is ok now...'})
 })
+
 
 app.listen(port, async () => {
     return console.log(`Server is listening on ${port}`)

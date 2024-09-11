@@ -62,10 +62,8 @@ app.use(routeStock_1.default);
 app.use(routeAddress_1.default);
 app.use(routePhone_1.default);
 app.use(routeSaleItem_1.default);
-app.get('/', (res) => {
-    return res.status(200).json({
-        msg: 'Api is on...'
-    });
+app.get('/', (req, res) => {
+    return res.json({ msg: 'Everything is ok now...' });
 });
 app.listen(port, () => __awaiter(void 0, void 0, void 0, function* () {
     return console.log(`Server is listening on ${port}`);
