@@ -6,6 +6,7 @@ import Query from "../helpers/Query";
 import Db from "../services/Db";
 import Company from "../models/Company";
 import * as dotenv from 'dotenv';
+import ErrorHelper from "../helpers/ErrorHelper";
 
 dotenv.config()
 
@@ -34,12 +35,18 @@ class AuthController{
             const selectUser = await Query.select(['*'], 'Users', [`${Object.keys(username)[0]} = "${Object.values(username)[0]}"`])
             const resultUser = Object.values(await Db.query(selectUser))
             const user: User = resultUser[0]
+
             
             const selectCompany = await Query.select(['*'], 'Companies', [`${Object.keys(username)[0]} = "${Object.values(username)[0]}"`])
             const resultCompany = Object.values(await Db.query(selectCompany))
             const company: Company = resultCompany[0]
 
-            await Validations.password(password, res, true, user, company)
+
+            if(!user && !company){
+                throw { status: 400, msg: 'user not found'}
+            }
+
+            user ? await Validations.password(password, res, true, user) :  await Validations.password(password, res, true, company)
 
             const token = jwt.sign(
                 {
@@ -53,13 +60,11 @@ class AuthController{
 
             res.status(200).json({msg: 'user authenticated', token: token})
         }catch(err){
-            if (!res.headersSent) {
-                const status = err.status || 500; 
-                const message = err.msg || 'server error'; 
-                return res.status(status).json({ msg: message });
-            }
+            ErrorHelper.standardError(req, res, err)
         }
     }
+
+    
 }
 
 export default new AuthController()

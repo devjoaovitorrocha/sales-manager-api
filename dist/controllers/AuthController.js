@@ -40,6 +40,7 @@ const Validations_1 = __importDefault(require("../helpers/Validations"));
 const Query_1 = __importDefault(require("../helpers/Query"));
 const Db_1 = __importDefault(require("../services/Db"));
 const dotenv = __importStar(require("dotenv"));
+const ErrorHelper_1 = __importDefault(require("../helpers/ErrorHelper"));
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 class AuthController {
@@ -66,7 +67,10 @@ class AuthController {
                 const selectCompany = yield Query_1.default.select(['*'], 'Companies', [`${Object.keys(username)[0]} = "${Object.values(username)[0]}"`]);
                 const resultCompany = Object.values(yield Db_1.default.query(selectCompany));
                 const company = resultCompany[0];
-                yield Validations_1.default.password(password, res, true, user, company);
+                if (!user && !company) {
+                    throw { status: 400, msg: 'user not found' };
+                }
+                user ? yield Validations_1.default.password(password, res, true, user) : yield Validations_1.default.password(password, res, true, company);
                 const token = jsonwebtoken_1.default.sign({
                     id: user ? user.id : company.id,
                     username: Object.values(username)[0],
@@ -75,11 +79,7 @@ class AuthController {
                 res.status(200).json({ msg: 'user authenticated', token: token });
             }
             catch (err) {
-                if (!res.headersSent) {
-                    const status = err.status || 500;
-                    const message = err.msg || 'server error';
-                    return res.status(status).json({ msg: message });
-                }
+                ErrorHelper_1.default.standardError(req, res, err);
             }
         });
     }

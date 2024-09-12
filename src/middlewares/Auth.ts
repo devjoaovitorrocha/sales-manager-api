@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JsonWebTokenError, Jwt, JwtHeader } from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
+import ErrorHelper from '../helpers/ErrorHelper';
 
 dotenv.config()
 
@@ -35,23 +36,23 @@ class Auth{
             req.user = decoded as JwtPayload;
 
             next()
-        }catch(err){
-            if (!res.headersSent) {
-                const status = err.status || 500; // Padrão para 500 se o status não for fornecido
-                const message = err.msg || 'server error'; // Mensagem padrão se não for especificada
-                return res.status(status).json({ msg: message });
-            }
+        }catch(err: JsonWebTokenError | any){
+            ErrorHelper.jwtError(req, res, err)
         }
     }
 }
 
 export const checkRole = (roles?: Array<string>) => (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user as JwtPayload
-    if(roles && !roles.includes(user.role)){
-        throw {status: 403, msg: 'access forbidden'}
-    }
+    try{
+        const user = req.user as JwtPayload
+        if(roles && !roles.includes(user.role)){
+            throw {status: 403, msg: 'access forbidden'}
+        }
 
-    next()
+        next()
+    }catch(err){
+        ErrorHelper.standardError(req, res, err)
+    }
 }
 
 export default new Auth()

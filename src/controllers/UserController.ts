@@ -4,6 +4,7 @@ import mysql from 'mysql2/promise';
 import Query from "../helpers/Query";
 import Validations from "../helpers/Validations";
 import User from "../models/User";
+import ErrorHelper from "../helpers/ErrorHelper";
 
 const query = Query
 
@@ -46,11 +47,7 @@ class UserController{
             // return res.status(200).json({msg: "user registered"})
 
         }catch(err){
-            if (!res.headersSent) {
-                const status = err.status || 500; 
-                const message = err.msg || 'server error';
-                return res.status(status).json({ msg: message });
-            }
+            ErrorHelper.standardError(req, res, err)
         }
     }
 

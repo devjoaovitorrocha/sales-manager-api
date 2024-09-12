@@ -32,6 +32,27 @@ class Query{
 
         return `insert into ${table} (${columns}) values (${formatedValues});`
     }
+
+    async update(table: string, updates: { [key: string]: any }, filters: Array<string>, filtersType?: Array<string> ){
+
+      const setClause = Object.entries(updates).map(([column, value]) => `${column} = '${value}'`).join(', ');
+    
+      let whereClause = '';
+      if (filters.length > 1) {
+        whereClause = filters.map((filter: string, index: number) => {
+          const operator = index > 0 && filtersType && filtersType[index - 1] ? filtersType[index - 1] : '';
+          
+          return `${operator} ${filter}`.trim();
+        }).join(' ');
+    
+        whereClause = ` where ${whereClause}`;
+      } else if (filters && filters.length === 1) {
+        whereClause = ` where ${filters[0]}`; 
+      }
+    
+      return `update ${table} set ${setClause}${whereClause};`;
+    }
+    
 }
 
 export default new Query()

@@ -28,10 +28,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const Auth_1 = __importStar(require("../middlewares/Auth"));
+const CompanyController_1 = __importDefault(require("../controllers/CompanyController"));
 const update = express_1.default.Router();
-update.post('/update/test/:userId', Auth_1.default.checkToken, (0, Auth_1.checkRole)(), (req, res) => {
-    console.log('oi');
-    return res.json({ msg: 'oi' });
-});
+update.post('/update/company/registration/info/:userId', Auth_1.default.checkToken, (0, Auth_1.checkRole)(['master']), CompanyController_1.default.update);
 exports.default = update;
 //# sourceMappingURL=update.js.map

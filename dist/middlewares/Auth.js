@@ -38,6 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkRole = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
+const ErrorHelper_1 = __importDefault(require("../helpers/ErrorHelper"));
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 class Auth {
@@ -55,21 +56,22 @@ class Auth {
                 next();
             }
             catch (err) {
-                if (!res.headersSent) {
-                    const status = err.status || 500; // Padrão para 500 se o status não for fornecido
-                    const message = err.msg || 'server error'; // Mensagem padrão se não for especificada
-                    return res.status(status).json({ msg: message });
-                }
+                ErrorHelper_1.default.jwtError(req, res, err);
             }
         });
     }
 }
 const checkRole = (roles) => (req, res, next) => {
-    const user = req.user;
-    if (roles && !roles.includes(user.role)) {
-        throw { status: 403, msg: 'access forbidden' };
+    try {
+        const user = req.user;
+        if (roles && !roles.includes(user.role)) {
+            throw { status: 403, msg: 'access forbidden' };
+        }
+        next();
     }
-    next();
+    catch (err) {
+        ErrorHelper_1.default.standardError(req, res, err);
+    }
 };
 exports.checkRole = checkRole;
 exports.default = new Auth();

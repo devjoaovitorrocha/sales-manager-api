@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const Query_1 = __importDefault(require("../helpers/Query"));
 const Validations_1 = __importDefault(require("../helpers/Validations"));
+const ErrorHelper_1 = __importDefault(require("../helpers/ErrorHelper"));
 const query = Query_1.default;
 class UserController {
     registerAdminMaster(req, res) {
@@ -38,11 +39,7 @@ class UserController {
                 // return res.status(200).json({msg: "user registered"})
             }
             catch (err) {
-                if (!res.headersSent) {
-                    const status = err.status || 500;
-                    const message = err.msg || 'server error';
-                    return res.status(status).json({ msg: message });
-                }
+                ErrorHelper_1.default.standardError(req, res, err);
             }
         });
     }
